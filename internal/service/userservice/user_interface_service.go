@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/wellls/api-example-golang/internal/dto"
+	"github.com/wellls/api-example-golang/internal/handler/response"
 	"github.com/wellls/api-example-golang/internal/repository/userrepository"
 )
 
@@ -20,4 +21,5 @@ type service struct {
 type UserService interface {
 	CreateUser(ctx context.Context, u dto.CreateUserDto) error
 	UpdateUser(ctx context.Context, u dto.UpdateUserDto, id string) error
+	GetUserByID(ctx context.Context, id string) (*response.UserResponse, error)
 }
