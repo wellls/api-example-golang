@@ -2,6 +2,7 @@ package userservice
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/wellls/api-example-golang/internal/dto"
@@ -29,4 +30,20 @@ func (s *service) GetUserByID(ctx context.Context, id string) (*response.UserRes
 
 func (s *service) DeleteUser(ctx context.Context, id string) error {
 	return nil
+}
+
+func (s *service) FindManyUsers(ctx context.Context) (response.ManyUsersResponse, error) {
+	// create fake users
+	usersFake := response.ManyUsersResponse{}
+	for i := 0; i < 5; i++ {
+		userFake := response.UserResponse{
+			ID:        "123",
+			Name:      "John Doe",
+			Email:     fmt.Sprintf("jonh.doe-%v@email.com", i),
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		}
+		usersFake.Users = append(usersFake.Users, userFake)
+	}
+	return usersFake, nil
 }
