@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/wellls/api-example-golang/config/env"
 	"github.com/wellls/api-example-golang/config/logger"
+	_ "github.com/wellls/api-example-golang/docs"
 	"github.com/wellls/api-example-golang/internal/database"
 	"github.com/wellls/api-example-golang/internal/database/sqlc"
 	"github.com/wellls/api-example-golang/internal/handler/routes"
@@ -31,7 +32,6 @@ func main() {
 		return
 	}
 
-	router := chi.NewRouter()
 	queries := sqlc.New(dbConnection)
 
 	// user
@@ -40,7 +40,9 @@ func main() {
 	newUserHandler := userhandler.NewUserHandler(newUserService)
 
 	// init routes
+	router := chi.NewRouter()
 	routes.InitUserRoutes(router, newUserHandler)
+	routes.InitDocsRoutes(router)
 
 	port := fmt.Sprintf(":%s", env.Env.GoPort)
 	slog.Info(fmt.Sprintf("server running on port %s", port))
