@@ -3,7 +3,6 @@ package userservice
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 	"time"
 
@@ -155,7 +154,39 @@ func (s *service) FindManyUsers(ctx context.Context) (*response.ManyUsersRespons
 }
 
 func (s *service) UpdateUserPassword(ctx context.Context, u *dto.UpdateUserPasswordDto, id string) error {
-	fmt.Println("new password: ", u.Password)
-	fmt.Println("old password: ", u.OldPassword)
+	userExists, err := s.repo.FindUserByID(ctx, id)
+	if err != nil {
+		slog.Error("error to search user by id", "err", err, slog.String("package", "userservice"))
+		return err
+	}
+	if userExists == nil {
+		slog.Error("user not found", slog.String("package", "userservice"))
+		return errors.New("user not found")
+	}
+
+	// compare passwords
+	err = bcrypt.CompareHashAndPassword([]byte(userExists.Password), []byte(u.OldPassword))
+	if err != nil {
+		slog.Error("invalid password", slog.String("package", "userservice"))
+		return errors.New("invalid password")
+	}
+
+	// compare new password with password in database
+	err = bcrypt.CompareHashAndPassword([]byte(userExists.Password), []byte(u.Password))
+	if err == nil {
+		slog.Error("new password is equal to old password", slog.String("package", "userservice"))
+		return errors.New("new password is equal to old password")
+	}
+
+	passwordEncrypted, err := bcrypt.GenerateFromPassword([]byte(u.Password), 12)
+	if err != nil {
+		slog.Error("error to encrypt password", "err", err, slog.String("package", "userservice"))
+		return errors.New("error to encrypt password")
+	}
+	err = s.repo.UpdatePassword(ctx, string(passwordEncrypted), id)
+	if err != nil {
+		slog.Error("error to update password", "err", err, slog.String("package", "userservice"))
+		return err
+	}
 	return nil
 }
