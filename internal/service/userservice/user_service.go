@@ -50,6 +50,42 @@ func (s *service) CreateUser(ctx context.Context, u dto.CreateUserDto) error {
 }
 
 func (s *service) UpdateUser(ctx context.Context, u dto.UpdateUserDto, id string) error {
+	userExists, err := s.repo.FindUserByID(ctx, id)
+	if err != nil {
+		slog.Error("error to search user by id", "err", err, slog.String("package", "userservice"))
+		return err
+	}
+
+	if userExists == nil {
+		slog.Error("user not found", slog.String("package", "userservice"))
+		return errors.New("user not found")
+	}
+
+	if u.Email != "" {
+		verifyUserEmail, err := s.repo.FindUserByEmail(ctx, u.Email)
+		if err != nil {
+			slog.Error("error to search user by email", "err", err, slog.String("package", "userservice"))
+			return err
+		}
+
+		if verifyUserEmail != nil {
+			slog.Error("user already exists", slog.String("package", "userservice"))
+			return errors.New("user already exists")
+		}
+	}
+
+	updateUser := entity.UserEntity{
+		ID:        id,
+		Name:      u.Name,
+		Email:     u.Email,
+		UpdatedAt: time.Now(),
+	}
+	err = s.repo.UpdateUser(ctx, &updateUser)
+	if err != nil {
+		slog.Error("error to update user", "err", err, slog.String("package", "userservice"))
+		return err
+	}
+
 	return nil
 }
 
