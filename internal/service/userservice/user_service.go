@@ -90,14 +90,26 @@ func (s *service) UpdateUser(ctx context.Context, u dto.UpdateUserDto, id string
 }
 
 func (s *service) GetUserByID(ctx context.Context, id string) (*response.UserResponse, error) {
-	userFake := response.UserResponse{
-		ID:        "123",
-		Name:      "John Doe",
-		Email:     "jonh.doe@email.com",
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+	userExists, err := s.repo.FindUserByID(ctx, id)
+	if err != nil {
+		slog.Error("error to search user by id", "err", err, slog.String("package", "userservice"))
+		return nil, err
 	}
-	return &userFake, nil
+
+	if userExists == nil {
+		slog.Error("user not found", slog.String("package", "userservice"))
+		return nil, errors.New("user not found")
+	}
+
+	user := response.UserResponse{
+		ID:        userExists.ID,
+		Name:      userExists.Name,
+		Email:     userExists.Email,
+		CreatedAt: userExists.CreatedAt,
+		UpdatedAt: userExists.UpdatedAt,
+	}
+
+	return &user, nil
 }
 
 func (s *service) DeleteUser(ctx context.Context, id string) error {
