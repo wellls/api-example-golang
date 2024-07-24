@@ -47,3 +47,9 @@ func (s *service) FindManyUsers(ctx context.Context) (response.ManyUsersResponse
 	}
 	return usersFake, nil
 }
+
+func (s *service) UpdateUserPassword(ctx context.Context, u *dto.UpdateUserPasswordDto, id string) error {
+	fmt.Println("new password: ", u.Password)
+	fmt.Println("old password: ", u.OldPassword)
+	return nil
+}
