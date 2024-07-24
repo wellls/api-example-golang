@@ -113,23 +113,45 @@ func (s *service) GetUserByID(ctx context.Context, id string) (*response.UserRes
 }
 
 func (s *service) DeleteUser(ctx context.Context, id string) error {
+	userExists, err := s.repo.FindUserByID(ctx, id)
+	if err != nil {
+		slog.Error("error to search user by id", "err", err, slog.String("package", "userservice"))
+		return err
+	}
+	if userExists == nil {
+		slog.Error("user not found", slog.String("package", "userservice"))
+		return errors.New("user not found")
+	}
+
+	err = s.repo.DeleteUser(ctx, id)
+	if err != nil {
+		slog.Error("error to delete user", "err", err, slog.String("package", "userservice"))
+		return err
+	}
+
 	return nil
 }
 
-func (s *service) FindManyUsers(ctx context.Context) (response.ManyUsersResponse, error) {
-	// create fake users
-	usersFake := response.ManyUsersResponse{}
-	for i := 0; i < 5; i++ {
-		userFake := response.UserResponse{
-			ID:        "123",
-			Name:      "John Doe",
-			Email:     fmt.Sprintf("jonh.doe-%v@email.com", i),
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		}
-		usersFake.Users = append(usersFake.Users, userFake)
+func (s *service) FindManyUsers(ctx context.Context) (*response.ManyUsersResponse, error) {
+	findManyUsers, err := s.repo.FindManyUsers(ctx)
+	if err != nil {
+		slog.Error("error to find many users", "err", err, slog.String("package", "userservice"))
+		return nil, err
 	}
-	return usersFake, nil
+
+	users := response.ManyUsersResponse{}
+	for _, user := range findManyUsers {
+		userResponse := response.UserResponse{
+			ID:        user.ID,
+			Name:      user.Name,
+			Email:     user.Email,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+		}
+		users.Users = append(users.Users, userResponse)
+	}
+
+	return &users, nil
 }
 
 func (s *service) UpdateUserPassword(ctx context.Context, u *dto.UpdateUserPasswordDto, id string) error {
