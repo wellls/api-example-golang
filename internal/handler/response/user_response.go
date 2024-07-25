@@ -13,3 +13,6 @@ type UserResponse struct {
 type ManyUsersResponse struct {
 	Users []UserResponse `json:"users"`
 }
+type UserAuthToken struct {
+	AccessToken string `json:"access_token"`
+}
