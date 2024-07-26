@@ -1,4 +1,4 @@
-package userhandler
+package handler
 
 import (
 	"encoding/json"
@@ -49,7 +49,7 @@ func (h *handler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(httpErr)
 		return
 	}
-	err = h.service.CreateUser(r.Context(), req)
+	err = h.userService.CreateUser(r.Context(), req)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error to create user: %v", err), slog.String("package", "userhandler"))
 		if err.Error() == "cep not found" {
@@ -118,7 +118,7 @@ func (h *handler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(httpErr)
 		return
 	}
-	err = h.service.UpdateUser(r.Context(), req, user.ID)
+	err = h.userService.UpdateUser(r.Context(), req, user.ID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error to update user: %v", err), slog.String("package", "userhandler"))
 		if err.Error() == "user not found" {
@@ -168,7 +168,7 @@ func (h *handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(msg)
 		return
 	}
-	res, err := h.service.GetUserByID(r.Context(), user.ID)
+	res, err := h.userService.GetUserByID(r.Context(), user.ID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error to get user: %v", err), slog.String("package", "userhandler"))
 		if err.Error() == "user not found" {
@@ -210,7 +210,7 @@ func (h *handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(msg)
 		return
 	}
-	err = h.service.DeleteUser(r.Context(), user.ID)
+	err = h.userService.DeleteUser(r.Context(), user.ID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error to delete user: %v", err), slog.String("package", "userhandler"))
 		if err.Error() == "user not found" {
@@ -241,7 +241,7 @@ func (h *handler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500	{object}	httperr.RestErr
 //	@Router			/user [get]
 func (h *handler) FindManyUsers(w http.ResponseWriter, r *http.Request) {
-	res, err := h.service.FindManyUsers(r.Context())
+	res, err := h.userService.FindManyUsers(r.Context())
 	if err != nil {
 		slog.Error(fmt.Sprintf("error to find many users: %v", err), slog.String("package", "userhandler"))
 		w.WriteHeader(http.StatusInternalServerError)
@@ -301,7 +301,7 @@ func (h *handler) UpdateUserPassword(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(httpErr)
 		return
 	}
-	err = h.service.UpdateUserPassword(r.Context(), &req, user.ID)
+	err = h.userService.UpdateUserPassword(r.Context(), &req, user.ID)
 	if err != nil {
 		slog.Error(fmt.Sprintf("error to update user password: %v", err), slog.String("package", "userhandler"))
 		if err.Error() == "user not found" {

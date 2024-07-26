@@ -11,6 +11,21 @@ import (
 	"github.com/wellls/api-example-golang/internal/common/utils"
 )
 
+var sensitiveKeywords = []string{"password"}
+
+func hasSensitiveData(body map[string]interface{}) bool {
+	for key := range body {
+		for _, keyword := range sensitiveKeywords {
+			if value, ok := body[key].(string); ok {
+				if strings.Contains(strings.ToLower(key), keyword) || strings.Contains(strings.ToLower(value), keyword) {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
 func LoggerData(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var requestData map[string]interface{}
@@ -25,9 +40,10 @@ func LoggerData(next http.Handler) http.Handler {
 			if hasSensitiveData(requestData) {
 				for key := range requestData {
 					for _, keyword := range sensitiveKeywords {
-
-						if strings.Contains(strings.ToLower(key), keyword) || strings.Contains(strings.ToLower(requestData[key].(string)), keyword) {
-							requestData[key] = "[REDACTED]"
+						if value, ok := requestData[key].(string); ok {
+							if strings.Contains(strings.ToLower(key), keyword) || strings.Contains(strings.ToLower(value), keyword) {
+								requestData[key] = "[REDACTED]"
+							}
 						}
 					}
 				}
@@ -43,33 +59,20 @@ func LoggerData(next http.Handler) http.Handler {
 		if err != nil {
 			userID = "no token"
 			userEmail = "no token"
-
 		} else {
 			userID = user.ID
 			userEmail = user.Email
 		}
+
 		slog.Info("request_data",
 			slog.Any("url", r.URL.Path),
 			slog.Any("method", r.Method),
 			slog.Any("query", r.URL.Query()),
 			slog.Any("body", requestData),
-			slog.Any("user_id", userID),
-			slog.Any("user_email", userEmail),
+			slog.Any("id", userID),
+			slog.Any("email", userEmail),
 		)
 
 		next.ServeHTTP(w, r)
 	})
-}
-
-var sensitiveKeywords = []string{"password"}
-
-func hasSensitiveData(body map[string]interface{}) bool {
-	for key := range body {
-		for _, keyword := range sensitiveKeywords {
-			if strings.Contains(strings.ToLower(key), keyword) || strings.Contains(strings.ToLower(body[key].(string)), keyword) {
-				return true
-			}
-		}
-	}
-	return false
 }

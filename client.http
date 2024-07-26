@@ -64,3 +64,57 @@ content-type: application/json
 }
 ###
 @token = {{login.response.body.access_token}}
+
+### Categories
+
+## CreateCategory
+POST http://localhost:8080/category HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Samsung"
+}
+
+### Products
+
+## CreateProduct
+POST http://localhost:8080/product HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "title": "Samsung",
+  "description": "wewewe",
+  "categories": ["75e9c961-4392-419b-8c2a-04394c2ef176"],
+  "price": 39900
+}
+
+###
+
+## UpdateProduct
+PATCH http://localhost:8080/product/c7a28df4-6d97-4273-9716-8ec69eca9b12 HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "categories": ["75e9c961-4392-419b-8c2a-04394c2ef176"]
+}
+
+###
+
+## DeleteProduct
+DELETE http://localhost:8080/product/f720e1ce-cb88-4f72-a765-0250c1a525e3 HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+## FindManyProducts
+GET http://localhost:8080/product HTTP/1.1
+content-type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "categories": ["75e9c961-4392-419b-8c2a-04394c2ef176"]
+}

@@ -23,24 +23,20 @@ func (s *service) CreateUser(ctx context.Context, u dto.CreateUserDto) error {
 			return err
 		}
 	}
-
 	if userExists != nil {
 		slog.Error("user already exists", slog.String("package", "userservice"))
 		return errors.New("user already exists")
 	}
-
 	passwordEncrypted, err := bcrypt.GenerateFromPassword([]byte(u.Password), 12)
 	if err != nil {
 		slog.Error("error to encrypt password", "err", err, slog.String("package", "userservice"))
 		return errors.New("error to encrypt password")
 	}
-
 	cep, err := viacep.GetCep(u.CEP)
 	if err != nil {
 		slog.Error("error to get cep", "err", err, slog.String("package", "userservice"))
 		return err
 	}
-
 	newUser := entity.UserEntity{
 		ID:       uuid.New().String(),
 		Name:     u.Name,
@@ -57,13 +53,11 @@ func (s *service) CreateUser(ctx context.Context, u dto.CreateUserDto) error {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-
 	err = s.repo.CreateUser(ctx, &newUser)
 	if err != nil {
 		slog.Error("error to create user", "err", err, slog.String("package", "userservice"))
 		return err
 	}
-
 	return nil
 }
 
@@ -77,7 +71,6 @@ func (s *service) UpdateUser(ctx context.Context, u dto.UpdateUserDto, id string
 		slog.Error("error to search user by id", "err", err, slog.String("package", "userservice"))
 		return err
 	}
-
 	var updateUser entity.UserEntity
 	if u.Email != "" {
 		userExists, err := s.repo.FindUserByEmail(ctx, u.Email)
@@ -93,7 +86,6 @@ func (s *service) UpdateUser(ctx context.Context, u dto.UpdateUserDto, id string
 		}
 		updateUser.Email = u.Email
 	}
-
 	if u.CEP != "" {
 		cep, err := viacep.GetCep(u.CEP)
 		if err != nil {
@@ -112,13 +104,11 @@ func (s *service) UpdateUser(ctx context.Context, u dto.UpdateUserDto, id string
 	updateUser.ID = id
 	updateUser.Name = u.Name
 	updateUser.UpdatedAt = time.Now()
-
 	err = s.repo.UpdateUser(ctx, &updateUser)
 	if err != nil {
 		slog.Error("error to update user", "err", err, slog.String("package", "userservice"))
 		return err
 	}
-
 	return nil
 }
 
@@ -128,20 +118,24 @@ func (s *service) GetUserByID(ctx context.Context, id string) (*response.UserRes
 		slog.Error("error to search user by id", "err", err, slog.String("package", "userservice"))
 		return nil, err
 	}
-
 	if userExists == nil {
 		slog.Error("user not found", slog.String("package", "userservice"))
 		return nil, errors.New("user not found")
 	}
-
 	user := response.UserResponse{
-		ID:        userExists.ID,
-		Name:      userExists.Name,
-		Email:     userExists.Email,
+		ID:    userExists.ID,
+		Name:  userExists.Name,
+		Email: userExists.Email,
+		Address: response.UserAddress{
+			CEP:        userExists.Address.CEP,
+			UF:         userExists.Address.UF,
+			City:       userExists.Address.City,
+			Complement: userExists.Address.Complement,
+			Street:     userExists.Address.Street,
+		},
 		CreatedAt: userExists.CreatedAt,
 		UpdatedAt: userExists.UpdatedAt,
 	}
-
 	return &user, nil
 }
 
@@ -155,13 +149,11 @@ func (s *service) DeleteUser(ctx context.Context, id string) error {
 		slog.Error("user not found", slog.String("package", "userservice"))
 		return errors.New("user not found")
 	}
-
 	err = s.repo.DeleteUser(ctx, id)
 	if err != nil {
 		slog.Error("error to delete user", "err", err, slog.String("package", "userservice"))
 		return err
 	}
-
 	return nil
 }
 
@@ -171,19 +163,24 @@ func (s *service) FindManyUsers(ctx context.Context) (*response.ManyUsersRespons
 		slog.Error("error to find many users", "err", err, slog.String("package", "userservice"))
 		return nil, err
 	}
-
 	users := response.ManyUsersResponse{}
 	for _, user := range findManyUsers {
 		userResponse := response.UserResponse{
-			ID:        user.ID,
-			Name:      user.Name,
-			Email:     user.Email,
+			ID:    user.ID,
+			Name:  user.Name,
+			Email: user.Email,
+			Address: response.UserAddress{
+				CEP:        user.Address.CEP,
+				UF:         user.Address.UF,
+				City:       user.Address.City,
+				Complement: user.Address.Complement,
+				Street:     user.Address.Street,
+			},
 			CreatedAt: user.CreatedAt,
 			UpdatedAt: user.UpdatedAt,
 		}
 		users.Users = append(users.Users, userResponse)
 	}
-
 	return &users, nil
 }
 

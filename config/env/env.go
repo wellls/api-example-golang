@@ -32,7 +32,6 @@ func LoadingConfig(path string) (*config, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	Env.TokenAuth = jwtauth.New("HS256", []byte(Env.JwtSecret), nil)
 	return Env, nil
 }

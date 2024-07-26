@@ -10,6 +10,7 @@ type UserResponse struct {
 	CreatedAt time.Time   `json:"created_at"`
 	UpdatedAt time.Time   `json:"updated_at"`
 }
+
 type UserAddress struct {
 	CEP        string `json:"cep"`
 	UF         string `json:"uf"`
@@ -17,9 +18,11 @@ type UserAddress struct {
 	Complement string `json:"complement,omitempty"`
 	Street     string `json:"street"`
 }
+
 type ManyUsersResponse struct {
 	Users []UserResponse `json:"users"`
 }
+
 type UserAuthToken struct {
 	AccessToken string `json:"access_token"`
 }

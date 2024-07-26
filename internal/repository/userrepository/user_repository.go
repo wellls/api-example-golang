@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/wellls/api-example-golang/internal/database/sqlc"
 	"github.com/wellls/api-example-golang/internal/entity"
-	"github.com/wellls/api-example-golang/internal/repository/transaction"
+	transaction "github.com/wellls/api-example-golang/internal/repository/transaction"
 )
 
 func (r *repository) CreateUser(ctx context.Context, u *entity.UserEntity) error {

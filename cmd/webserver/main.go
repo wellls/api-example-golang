@@ -8,12 +8,15 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/wellls/api-example-golang/config/env"
 	"github.com/wellls/api-example-golang/config/logger"
-	_ "github.com/wellls/api-example-golang/docs"
 	"github.com/wellls/api-example-golang/internal/database"
 	"github.com/wellls/api-example-golang/internal/database/sqlc"
+	"github.com/wellls/api-example-golang/internal/handler"
 	"github.com/wellls/api-example-golang/internal/handler/routes"
-	"github.com/wellls/api-example-golang/internal/handler/userhandler"
+	"github.com/wellls/api-example-golang/internal/repository/categoryrepository"
+	"github.com/wellls/api-example-golang/internal/repository/productrepository"
 	"github.com/wellls/api-example-golang/internal/repository/userrepository"
+	"github.com/wellls/api-example-golang/internal/service/categoryservice"
+	"github.com/wellls/api-example-golang/internal/service/productservice"
 	"github.com/wellls/api-example-golang/internal/service/userservice"
 )
 
@@ -37,11 +40,20 @@ func main() {
 	// user
 	userRepo := userrepository.NewUserRepository(dbConnection, queries)
 	newUserService := userservice.NewUserService(userRepo)
-	newUserHandler := userhandler.NewUserHandler(newUserService)
+
+	// category
+	categoryRepo := categoryrepository.NewCategoryRepository(dbConnection, queries)
+	newCategoryService := categoryservice.NewCategoryService(categoryRepo)
+
+	// product
+	productRepo := productrepository.NewProductRepository(dbConnection, queries)
+	productsService := productservice.NewProductService(productRepo)
+
+	newHandler := handler.NewHandler(newUserService, newCategoryService, productsService)
 
 	// init routes
 	router := chi.NewRouter()
-	routes.InitUserRoutes(router, newUserHandler)
+	routes.InitRoutes(router, newHandler)
 	routes.InitDocsRoutes(router)
 
 	port := fmt.Sprintf(":%s", env.Env.GoPort)
