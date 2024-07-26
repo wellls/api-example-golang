@@ -54,7 +54,25 @@ func (r *repository) FindUserByEmail(ctx context.Context, email string) (*entity
 }
 
 func (r *repository) FindUserByID(ctx context.Context, id string) (*entity.UserEntity, error) {
-	return nil, nil
+	user, err := r.queries.FindUserByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	userEntity := entity.UserEntity{
+		ID:    user.ID,
+		Name:  user.Name,
+		Email: user.Email,
+		Address: entity.UserAddress{
+			CEP:        user.Cep,
+			UF:         user.Uf,
+			City:       user.City,
+			Complement: user.Complement.String,
+			Street:     user.Street,
+		},
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
+	return &userEntity, nil
 }
 
 func (r *repository) UpdateUser(ctx context.Context, u *entity.UserEntity) error {
