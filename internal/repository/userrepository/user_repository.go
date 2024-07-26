@@ -76,10 +76,36 @@ func (r *repository) FindUserByID(ctx context.Context, id string) (*entity.UserE
 }
 
 func (r *repository) UpdateUser(ctx context.Context, u *entity.UserEntity) error {
+	err := r.queries.UpdateUser(ctx, sqlc.UpdateUserParams{
+		ID:        u.ID,
+		Name:      sql.NullString{String: u.Name, Valid: u.Name != ""},
+		Email:     sql.NullString{String: u.Email, Valid: u.Email != ""},
+		UpdatedAt: u.UpdatedAt,
+	})
+	if err != nil {
+		return err
+	}
+	err = r.queries.UpdateUserAddress(ctx, sqlc.UpdateUserAddressParams{
+		UserID:     u.ID,
+		Cep:        sql.NullString{String: u.Address.CEP, Valid: u.Address.CEP != ""},
+		Ibge:       sql.NullString{String: u.Address.IBGE, Valid: u.Address.IBGE != ""},
+		Uf:         sql.NullString{String: u.Address.UF, Valid: u.Address.UF != ""},
+		City:       sql.NullString{String: u.Address.City, Valid: u.Address.City != ""},
+		Complement: sql.NullString{String: u.Address.Complement, Valid: u.Address.Complement != ""},
+		Street:     sql.NullString{String: u.Address.Street, Valid: u.Address.Street != ""},
+		UpdatedAt:  time.Now(),
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
 func (r *repository) DeleteUser(ctx context.Context, id string) error {
+	err := r.queries.DeleteUser(ctx, id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
