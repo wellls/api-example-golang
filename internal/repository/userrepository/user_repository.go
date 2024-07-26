@@ -147,10 +147,10 @@ func (r *repository) UpdatePassword(ctx context.Context, pass, id string) error 
 	return nil
 }
 
-func (r *repository) GetUserPassword(ctx context.Context, id string) (*entity.UserEntity, error) {
-	userMock := entity.UserEntity{
-		ID:       "1",
-		Password: "$2y$12$CwjjXJGAkR4OKQeTvMo9suJ1s6PdKl9l4RZL9/yg.8cccDE8o/5sm",
+func (r *repository) GetUserPassword(ctx context.Context, id string) (string, error) {
+	pass, err := r.queries.GetUserPassword(ctx, id)
+	if err != nil {
+		return "", err
 	}
-	return &userMock, nil
+	return pass, nil
 }
