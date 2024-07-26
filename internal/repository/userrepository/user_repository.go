@@ -136,6 +136,14 @@ func (r *repository) FindManyUsers(ctx context.Context) ([]entity.UserEntity, er
 }
 
 func (r *repository) UpdatePassword(ctx context.Context, pass, id string) error {
+	err := r.queries.UpdatePassword(ctx, sqlc.UpdatePasswordParams{
+		ID:        id,
+		Password:  pass,
+		UpdatedAt: time.Now(),
+	})
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
