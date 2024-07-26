@@ -110,7 +110,29 @@ func (r *repository) DeleteUser(ctx context.Context, id string) error {
 }
 
 func (r *repository) FindManyUsers(ctx context.Context) ([]entity.UserEntity, error) {
-	return nil, nil
+	users, err := r.queries.FindManyUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	var usersEntity []entity.UserEntity
+	for _, user := range users {
+		userEntity := entity.UserEntity{
+			ID:    user.ID,
+			Name:  user.Name,
+			Email: user.Email,
+			Address: entity.UserAddress{
+				CEP:        user.Cep,
+				UF:         user.Uf,
+				City:       user.City,
+				Street:     user.Street,
+				Complement: user.Complement.String,
+			},
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+		}
+		usersEntity = append(usersEntity, userEntity)
+	}
+	return usersEntity, nil
 }
 
 func (r *repository) UpdatePassword(ctx context.Context, pass, id string) error {
